@@ -55,6 +55,11 @@ bench: $(TESTS)
 		./$$test --bench $(TEST_DATA); \
 	done
 
+plot: $(TESTS) bench_cpy.txt bench_ref.txt find_bench_ref.txt
+	gnuplot ./scripts/runtime2.gp
+	eog runtime2.png
+
+
 clean:
 	$(RM) $(TESTS) $(OBJS)
 	$(RM) $(deps)

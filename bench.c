@@ -88,24 +88,18 @@ int find_bench_test(
 
     while (fscanf(dict, "%s", word) != EOF) {
         // printf("%s\n",word);
-        size_t len = strlen(word);
-        word[len] = '\0';
-        if (len && word[len - 1] == '\n')
-            word[--len] = 0;
+        // size_t len = strlen(word);
+        // word[len] = '\0';
+        // if (len && word[len - 1] == '\n')
+        //    word[--len] = 0;
         t1 = tvgetf();
-        // start_1 = clock();
-        bloom_test(bloom, word);
-        // end_1 = clock();
+        tst_search(root, word);
         t2 = tvgetf();
         t3 = tvgetf();
-        // start_2 = clock();
-        tst_search(root, word);
-        // end_2 = clock();
+        bloom_test(bloom, word);
         t4 = tvgetf();
         fprintf(fp, "%d %f %f nsec\n", idx, (t2 - t1) * 1000000,
                 (t4 - t3) * 1000000);
-        // fprintf(fp, "%d %f %f sec\n", idx,(double) (end_1 -
-        // start_1)/CLOCKS_PER_SEC, (double) (end_2 - start_2)/CLOCKS_PER_SEC);
         idx++;
     }
 
