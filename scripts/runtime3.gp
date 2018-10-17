@@ -1,6 +1,6 @@
 reset
 set xlabel 'prefix'
-set ylabel 'time(sec)'
+set ylabel 'time(nano sec)'
 set title 'perfomance comparison'
 set term png enhanced font 'Verdana,10'
 set output 'runtime3.png'
