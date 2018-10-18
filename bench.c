@@ -62,10 +62,7 @@ int bench_test(const tst_node *root, char *out_file, const int max)
     return 0;
 }
 
-int find_bench_test(
-    const tst_node *root,
-    char *out_file,
-    bloom_t bloom)  //,void (*bloom_test_ptr)(bloom_t,const void *) )
+int find_bench_test(const tst_node *root, char *out_file, bloom_t bloom)
 {
     FILE *fp = fopen(out_file, "w");
     FILE *dict = fopen(DICT_FILE, "r");

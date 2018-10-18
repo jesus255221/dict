@@ -4,9 +4,14 @@
 #include <time.h>
 
 #include "bench.c"
+#include "bloom.h"
 #include "tst.h"
+
+#define TableSize 5000000 /* size of bloom filter */
+
 /** constants insert, delete, max word(s) & stack nodes */
 enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
+
 #define REF INS
 #define CPY DEL
 
@@ -37,24 +42,28 @@ int main(int argc, char **argv)
         fprintf(stderr, "error: file open failed '%s'.\n", argv[1]);
         return 1;
     }
-
     t1 = tvgetf();
+
+    bloom_t bloom = bloom_create(TableSize);
+
     while ((rtn = fscanf(fp, "%s", word)) != EOF) {
         char *p = word;
         if (!tst_ins_del(&root, &p, INS, CPY)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
             return 1;
+        } else { /* update bloom filter */
+            bloom_add(bloom, word);
         }
         idx++;
     }
     t2 = tvgetf();
-
     fclose(fp);
     printf("ternary_tree, loaded %d words in %.6f sec\n", idx, t2 - t1);
 
     if (argc == 2 && strcmp(argv[1], "--bench") == 0) {
         int stat = bench_test(root, BENCH_TEST_FILE, LMAX);
+        stat = find_bench_test(root, "find_bench_cpy.txt", bloom);
         tst_free_all(root);
         return stat;
     }
@@ -96,11 +105,16 @@ int main(int argc, char **argv)
             rmcrlf(word);
             p = word;
             t1 = tvgetf();
-            res = tst_ins_del(&root, &p, INS, CPY);
+            if (bloom_test(bloom, word) == 1) /* if detected by filter, skip */
+                res = NULL;
+            else { /* update via tree traversal and bloom filter */
+                bloom_add(bloom, word);
+                res = tst_ins_del(&root, &p, INS, CPY);
+            }
             t2 = tvgetf();
             if (res) {
                 idx++;
-                printf("  %s - inserted in %.12f sec. (%d words in tree)\n",
+                printf("  %s - inserted in %.10f sec. (%d words in tree)\n",
                        (char *) res, t2 - t1, idx);
             } else
                 printf("  %s - already exists in list.\n", (char *) res);

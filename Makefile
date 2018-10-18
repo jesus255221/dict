@@ -44,10 +44,10 @@ test_%: test_%.o $(OBJS_LIB)
 test:  $(TESTS)
 	echo 3 | sudo tee /proc/sys/vm/drop_caches;
 	perf stat --repeat 100 \
-                -e cache-misses,cache-references,instructions,cycles \
+                -e cache-misses,cache-references,instructions,cycles,mem-loads,mem-stores,branch-misses,branch-instructions \
                 ./test_cpy --bench $(TEST_DATA)
 	perf stat --repeat 100 \
-                -e cache-misses,cache-references,instructions,cycles \
+                -e cache-misses,cache-references,instructions,cycles,mem-loads,mem-stores,branch-misses,branch-instructions \
 				./test_ref --bench $(TEST_DATA)
 
 bench: $(TESTS)
