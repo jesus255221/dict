@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +9,7 @@
 #include "tst.h"
 
 #define TableSize 5000000 /* size of bloom filter */
+#define HashNumber 2      /* number of hash functions */
 
 /** constants insert, delete, max word(s) & stack nodes */
 enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
@@ -131,12 +133,25 @@ int main(int argc, char **argv)
             }
             rmcrlf(word);
             t1 = tvgetf();
-            res = tst_search(root, word);
-            t2 = tvgetf();
-            if (res)
-                printf("  found %s in %.6f sec.\n", (char *) res, t2 - t1);
-            else
-                printf("  %s not found.\n", word);
+
+            if (bloom_test(bloom, word) == 1) {
+                t2 = tvgetf();
+                printf("  Bloomfilter found %s in %.6f sec.\n", word, t2 - t1);
+                printf(
+                    "  Probability of false positives:%lf\n",
+                    pow(1 - exp(-(double) HashNumber /
+                                (double) ((double) TableSize / (double) idx)),
+                        HashNumber));
+                t1 = tvgetf();
+                res = tst_search(root, word);
+                t2 = tvgetf();
+                if (res)
+                    printf("  ----------\n  Tree found %s in %.6f sec.\n",
+                           (char *) res, t2 - t1);
+                else
+                    printf("  ----------\n  %s not found by tree.\n", word);
+            } else
+                printf("  %s not found by bloom filter.\n", word);
             break;
         case 's':
             printf("find words matching prefix (at least 1 char): ");
